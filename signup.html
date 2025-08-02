@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyMate - Sign Up</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+            --secondary-gradient: linear-gradient(45deg, #ff6b9d, #c44569, #f8b500, #ff3838);
+            --neon-blue: #00d4ff;
+            --neon-pink: #ff0080;
+            --neon-green: #00ff88;
+        }
+        body {
+            background: black;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            font-family: 'Arial', 'Helvetica', 'Verdana', sans-serif;
+        }
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+        .glass-effect {
+            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            transition: all 0.3s ease;
+        }
+        .glass-effect:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.5);
+        }
+        .gradient-text {
+            background: var(--secondary-gradient);
+            background-size: 400% 400%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientShift 3s ease infinite;
+        }
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        .btn-primary {
+            background: linear-gradient(45deg, #ff6b9d, #c44569);
+            border: none;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        .neon-border {
+            border: 2px solid var(--neon-pink);
+            box-shadow: 0 0 10px var(--neon-pink), inset 0 0 10px rgba(255, 0, 128, 0.1);
+            animation: neonPulse 2s infinite alternate;
+        }
+        @keyframes neonPulse {
+            from { box-shadow: 0 0 10px var(--neon-pink), inset 0 0 10px rgba(255, 0, 128, 0.1); }
+            to { box-shadow: 0 0 20px var(--neon-pink), 0 0 30px var(--neon-pink), inset 0 0 20px rgba(255, 0, 128, 0.2); }
+        }
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1001;
+            min-width: 300px;
+            max-width: 400px;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            color: white;
+            font-weight: 500;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+        .notification.show {
+            transform: translateX(0);
+        }
+        .notification.success { background: linear-gradient(45deg, #10b981, #059669); }
+        .notification.error { background: linear-gradient(45deg, #ef4444, #dc2626); }
+        @media (prefers-reduced-motion: reduce) {
+            .particle, .gradient-text, .btn-primary::before { animation: none !important; }
+            .glass-effect:hover, .btn-primary:hover { transform: none !important; }
+        }
+        @media (max-width: 768px) { .glass-effect { margin: 0.5rem; padding: 1rem; } }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+    <div class="min-h-screen flex items-center justify-center p-4">
+        <div class="glass-effect rounded-3xl p-8 max-w-md w-full">
+            <h1 class="text-4xl font-bold gradient-text mb-6 text-center">
+                <i class="fas fa-user-plus mr-2"></i>Sign Up for StudyMate
+            </h1>
+            <p class="text-white opacity-80 text-center mb-6">Join the AI-powered learning revolution</p>
+            <form id="signupForm" class="space-y-4">
+                <div>
+                    <label for="username" class="text-white font-semibold">
+                        <i class="fas fa-user mr-2"></i>Username
+                    </label>
+                    <input type="text" id="username" placeholder="Choose a username" class="w-full p-3 mt-1 rounded-lg bg-white bg-opacity-20 text-white placeholder-white placeholder-opacity-70 border border-white border-opacity-30 focus:ring-2 focus:ring-blue-300 focus:outline-none" required minlength="3" aria-label="Username">
+                </div>
+                <div>
+                    <label for="email" class="text-white font-semibold">
+                        <i class="fas fa-envelope mr-2"></i>Email
+                    </label>
+                    <input type="email" id="email" placeholder="Enter your email" class="w-full p-3 mt-1 rounded-lg bg-white bg-opacity-20 text-white placeholder-white placeholder-opacity-70 border border-white border-opacity-30 focus:ring-2 focus:ring-blue-300 focus:outline-none" required aria-label="Email">
+                </div>
+                <div>
+                    <label for="password" class="text-white font-semibold">
+                        <i class="fas fa-lock mr-2"></i>Password
+                    </label>
+                    <input type="password" id="password" placeholder="Create a password" class="w-full p-3 mt-1 rounded-lg bg-white bg-opacity-20 text-white placeholder-white placeholder-opacity-70 border border-white border-opacity-30 focus:ring-2 focus:ring-blue-300 focus:outline-none" required minlength="6" aria-label="Password">
+                </div>
+                <button type="submit" class="btn-primary w-full text-white px-6 py-3 rounded-lg font-semibold neon-border" aria-label="Sign Up">
+                    <i class="fas fa-user-plus mr-2"></i>Sign Up
+                </button>
+            </form>
+            <p class="text-white opacity-80 text-center mt-6">
+                Already have an account? <a href="index.html" class="text-blue-300 hover:text-blue-400">Log in</a>
+            </p>
+        </div>
+    </div>
+    <div id="notificationContainer"></div>
+
+    <script>
+        function initParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = window.innerWidth < 768 ? 20 : 50;
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                const size = Math.random() * 5 + 2;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.top = `${Math.random() * 100}%`;
+                particle.style.animationDelay = `${Math.random() * 5}s`;
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        function showNotification(message, type = 'info', duration = 3000) {
+            const container = document.getElementById('notificationContainer');
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `<div class="flex items-center justify-between"><span>${message}</span><button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-white hover:text-gray-200"><i class="fas fa-times"></i></button></div>`;
+            container.appendChild(notification);
+            setTimeout(() => notification.classList.add('show'), 100);
+            if (duration > 0) {
+                setTimeout(() => { notification.classList.remove('show'); setTimeout(() => notification.remove(), 300); }, duration);
+            }
+        }
+
+        function setupSignupForm() {
+            const signupForm = document.getElementById('signupForm');
+            const usernameInput = document.getElementById('username');
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+
+            signupForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const username = usernameInput.value.trim();
+                const email = emailInput.value.trim();
+                const password = passwordInput.value;
+
+                if (username.length < 3) {
+                    showNotification('Username must be at least 3 characters.', 'error');
+                    return;
+                }
+                if (!email.includes('@') || !email.includes('.')) {
+                    showNotification('Invalid email format.', 'error');
+                    return;
+                }
+                if (password.length < 6) {
+                    showNotification('Password must be at least 6 characters.', 'error');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/signup', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, email, password })
+                    });
+                    const data = await response.json();
+                    if (response.ok) {
+                        showNotification(data.message || 'Signup successful', 'success', 2000);
+                        setTimeout(() => { window.location.href = data.redirect || 'index.html'; }, 2000);
+                    } else {
+                        showNotification(data.error || 'Signup failed', 'error');
+                    }
+                } catch (error) {
+                    showNotification('An error occurred. Please try again.', 'error');
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initParticles();
+            setupSignupForm();
+        });
+    </script>
+</body>
+</html>
