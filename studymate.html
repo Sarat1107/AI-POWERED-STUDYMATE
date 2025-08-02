@@ -292,7 +292,7 @@
                 </div>
                 <div class="flex flex-wrap justify-center items-center gap-3">
                     <span class="model-badge text-white px-4 py-2 rounded-full text-sm font-medium">
-                        <i class="fas fa-brain mr-2"></i>IBM Granite-3.0-8B-Instruct
+                        <i class="fas fa-brain mr-2"></i>IBM Watsonx Mixtral-8x7B
                     </span>
                     <span class="bg-gradient-to-r from-green-400 to-blue-500 text-white px-4 py-2 rounded-full text-sm font-medium">
                         <i class="fas fa-search mr-2"></i>FAISS Semantic Search
@@ -482,45 +482,27 @@
             uploadArea.addEventListener('dragleave', () => {
                 uploadArea.classList.remove('dragover');
             });
-            uploadArea.addEventListener('drop', async (e) => {
+            uploadArea.addEventListener('drop', (e) => {
                 e.preventDefault();
                 uploadArea.classList.remove('dragover');
                 const files = e.dataTransfer.files;
-                await handleFiles(files);
+                handleFiles(files);
             });
-            fileInput.addEventListener('change', async (e) => {
-                await handleFiles(e.target.files);
+            fileInput.addEventListener('change', (e) => {
+                handleFiles(e.target.files);
             });
             document.getElementById('browseBtn').addEventListener('click', () => {
                 fileInput.click();
             });
 
-            async function handleFiles(files) {
+            function handleFiles(files) {
                 for (const file of files) {
                     if (file.type === 'application/pdf' && file.size <= 10 * 1024 * 1024) {
-                        const formData = new FormData();
-                        formData.append('file', file);
-                        try {
-                            const response = await fetch('/api/upload', {
-                                method: 'POST',
-                                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
-                                body: formData
-                            });
-                            const data = await response.json();
-                            if (response.ok) {
-                                const fileItem = document.createElement('div');
-                                fileItem.textContent = data.filename;
-                                fileItem.dataset.filename = data.filename;
-                                filesContainer.appendChild(fileItem);
-                                document.getElementById('filesList').classList.remove('hidden');
-                                askBtn.disabled = false;
-                                showNotification(data.message, 'success');
-                            } else {
-                                showNotification(data.error, 'error');
-                            }
-                        } catch (error) {
-                            showNotification('Upload failed', 'error');
-                        }
+                        const fileItem = document.createElement('div');
+                        fileItem.textContent = file.name;
+                        filesContainer.appendChild(fileItem);
+                        document.getElementById('filesList').classList.remove('hidden');
+                        askBtn.disabled = false;
                     } else {
                         showNotification('Only PDFs up to 10MB are supported', 'error');
                     }
@@ -528,95 +510,52 @@
             }
         }
 
-        // Question asking
-        function setupQuestionAsking() {
-            const askBtn = document.getElementById('askBtn');
-            const questionInput = document.getElementById('questionInput');
-
-            askBtn.addEventListener('click', async () => {
-                const question = questionInput.value.trim();
-                const filename = document.querySelector('#filesContainer div')?.dataset.filename;
-
-                if (!question) {
-                    showNotification('Please enter a question', 'error');
-                    return;
-                }
-
-                try {
-                    const response = await fetch('/api/ask', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${localStorage.getItem('token')}`
-                        },
-                        body: JSON.stringify({ question, filename })
-                    });
-                    const data = await response.json();
-                    if (response.ok) {
-                        document.getElementById('answerContent').innerHTML = data.answer;
-                        document.getElementById('answerSection').classList.remove('hidden');
-                        showNotification('Question answered successfully', 'success');
-                    } else {
-                        showNotification(data.error, 'error');
-                    }
-                } catch (error) {
-                    showNotification('Failed to process question', 'error');
-                }
-            });
-
-            questionInput.addEventListener('input', (e) => {
-                document.getElementById('charCount').textContent = `${e.target.value.length} characters`;
-            });
-
-            questionInput.addEventListener('keydown', (e) => {
-                if (e.ctrlKey && e.key === 'Enter') {
-                    askBtn.click();
-                }
-            });
-        }
-
         // Logout handling
         function setupLogout() {
             const logoutBtn = document.getElementById('logoutBtn');
-            logoutBtn.addEventListener('click', async () => {
-                try {
-                    const response = await fetch('/api/logout', {
-                        method: 'POST',
-                        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-                    });
-                    const data = await response.json();
-                    if (response.ok) {
-                        localStorage.removeItem('loggedInUser');
-                        localStorage.removeItem('token');
-                        showNotification(data.message, 'success', 2000);
-                        setTimeout(() => { window.location.href = data.redirect; }, 2000);
-                    } else {
-                        showNotification(data.error, 'error');
-                    }
-                } catch (error) {
-                    showNotification('Logout failed', 'error');
-                }
+            logoutBtn.addEventListener('click', () => {
+                localStorage.removeItem('loggedInUser');
+                showNotification('Logged out successfully!', 'success', 2000);
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 2000);
             });
         }
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             // Check if user is logged in
-            const token = localStorage.getItem('token');
-            if (!token) {
+            // Note: localStorage is used for demo purposes only. In production, use secure backend authentication.
+            const loggedInUser = localStorage.getItem('loggedInUser');
+            if (!loggedInUser) {
                 showNotification('Please log in to access StudyMate', 'error', 2000);
-                setTimeout(() => { window.location.href = 'index.html'; }, 2000);
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 2000);
                 return;
             }
 
             initParticles();
             setupFileUpload();
-            setupQuestionAsking();
             setupLogout();
 
-            // Placeholder for voice input
+            // Note: PDF processing and voice input require external libraries (e.g., PyMuPDF, Web Speech API) and backend integration.
             document.getElementById('voiceBtn').addEventListener('click', () => {
                 showNotification('Voice input not implemented in this demo', 'info');
+            });
+
+            document.getElementById('askBtn').addEventListener('click', () => {
+                showNotification('Question processing not implemented in this demo', 'info');
+            });
+
+            document.getElementById('questionInput').addEventListener('input', (e) => {
+                document.getElementById('charCount').textContent = `${e.target.value.length} characters`;
+            });
+
+            document.getElementById('questionInput').addEventListener('keydown', (e) => {
+                if (e.ctrlKey && e.key === 'Enter') {
+                    document.getElementById('askBtn').click();
+                }
             });
         });
     </script>
