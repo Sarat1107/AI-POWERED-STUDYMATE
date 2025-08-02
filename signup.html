@@ -113,13 +113,26 @@
         .notification.show {
             transform: translateX(0);
         }
-        .notification.success { background: linear-gradient(45deg, #10b981, #059669); }
-        .notification.error { background: linear-gradient(45deg, #ef4444, #dc2626); }
-        @media (prefers-reduced-motion: reduce) {
-            .particle, .gradient-text, .btn-primary::before { animation: none !important; }
-            .glass-effect:hover, .btn-primary:hover { transform: none !important; }
+        .notification.success {
+            background: linear-gradient(45deg, #10b981, #059669);
         }
-        @media (max-width: 768px) { .glass-effect { margin: 0.5rem; padding: 1rem; } }
+        .notification.error {
+            background: linear-gradient(45deg, #ef4444, #dc2626);
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .particle, .gradient-text, .btn-primary::before {
+                animation: none !important;
+            }
+            .glass-effect:hover, .btn-primary:hover {
+                transform: none !important;
+            }
+        }
+        @media (max-width: 768px) {
+            .glass-effect {
+                margin: 0.5rem;
+                padding: 1rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -129,28 +142,67 @@
             <h1 class="text-4xl font-bold gradient-text mb-6 text-center">
                 <i class="fas fa-user-plus mr-2"></i>Sign Up for StudyMate
             </h1>
-            <p class="text-white opacity-80 text-center mb-6">Join the AI-powered learning revolution</p>
+            <p class="text-white opacity-80 text-center mb-6">Create your account to start learning smarter</p>
             <form id="signupForm" class="space-y-4">
                 <div>
                     <label for="username" class="text-white font-semibold">
                         <i class="fas fa-user mr-2"></i>Username
                     </label>
-                    <input type="text" id="username" placeholder="Choose a username" class="w-full p-3 mt-1 rounded-lg bg-white bg-opacity-20 text-white placeholder-white placeholder-opacity-70 border border-white border-opacity-30 focus:ring-2 focus:ring-blue-300 focus:outline-none" required minlength="3" aria-label="Username">
+                    <input
+                        type="text"
+                        id="username"
+                        placeholder="Enter your username"
+                        class="w-full p-3 mt-1 rounded-lg bg-white bg-opacity-20 text-white placeholder-white placeholder-opacity-70 border border-white border-opacity-30 focus:ring-2 focus:ring-blue-300 focus:outline-none"
+                        required
+                        aria-label="Username"
+                    >
                 </div>
                 <div>
                     <label for="email" class="text-white font-semibold">
                         <i class="fas fa-envelope mr-2"></i>Email
                     </label>
-                    <input type="email" id="email" placeholder="Enter your email" class="w-full p-3 mt-1 rounded-lg bg-white bg-opacity-20 text-white placeholder-white placeholder-opacity-70 border border-white border-opacity-30 focus:ring-2 focus:ring-blue-300 focus:outline-none" required aria-label="Email">
+                    <input
+                        type="email"
+                        id="email"
+                        placeholder="Enter your email"
+                        class="w-full p-3 mt-1 rounded-lg bg-white bg-opacity-20 text-white placeholder-white placeholder-opacity-70 border border-white border-opacity-30 focus:ring-2 focus:ring-blue-300 focus:outline-none"
+                        required
+                        aria-label="Email"
+                    >
                 </div>
                 <div>
                     <label for="password" class="text-white font-semibold">
                         <i class="fas fa-lock mr-2"></i>Password
                     </label>
-                    <input type="password" id="password" placeholder="Create a password" class="w-full p-3 mt-1 rounded-lg bg-white bg-opacity-20 text-white placeholder-white placeholder-opacity-70 border border-white border-opacity-30 focus:ring-2 focus:ring-blue-300 focus:outline-none" required minlength="6" aria-label="Password">
+                    <input
+                        type="password"
+                        id="password"
+                        placeholder="Enter your password"
+                        class="w-full p-3 mt-1 rounded-lg bg-white bg-opacity-20 text-white placeholder-white placeholder-opacity-70 border border-white border-opacity-30 focus:ring-2 focus:ring-blue-300 focus:outline-none"
+                        required
+                        aria-label="Password"
+                    >
+                    <div id="passwordStrength" class="text-sm mt-1 text-red-400"></div>
                 </div>
-                <button type="submit" class="btn-primary w-full text-white px-6 py-3 rounded-lg font-semibold neon-border" aria-label="Sign Up">
-                    <i class="fas fa-user-plus mr-2"></i>Sign Up
+                <div>
+                    <label for="confirmPassword" class="text-white font-semibold">
+                        <i class="fas fa-lock mr-2"></i>Confirm Password
+                    </label>
+                    <input
+                        type="password"
+                        id="confirmPassword"
+                        placeholder="Confirm your password"
+                        class="w-full p-3 mt-1 rounded-lg bg-white bg-opacity-20 text-white placeholder-white placeholder-opacity-70 border border-white border-opacity-30 focus:ring-2 focus:ring-blue-300 focus:outline-none"
+                        required
+                        aria-label="Confirm Password"
+                    >
+                </div>
+                <button
+                    type="submit"
+                    class="btn-primary w-full text-white px-6 py-3 rounded-lg font-semibold neon-border"
+                    aria-label="Create Account"
+                >
+                    <i class="fas fa-user-plus mr-2"></i>Create Account
                 </button>
             </form>
             <p class="text-white opacity-80 text-center mt-6">
@@ -161,6 +213,7 @@
     <div id="notificationContainer"></div>
 
     <script>
+        // Initialize particles
         function initParticles() {
             const particlesContainer = document.getElementById('particles');
             const particleCount = window.innerWidth < 768 ? 20 : 50;
@@ -177,40 +230,76 @@
             }
         }
 
+        // Notification function
         function showNotification(message, type = 'info', duration = 3000) {
             const container = document.getElementById('notificationContainer');
             const notification = document.createElement('div');
             notification.className = `notification ${type}`;
-            notification.innerHTML = `<div class="flex items-center justify-between"><span>${message}</span><button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-white hover:text-gray-200"><i class="fas fa-times"></i></button></div>`;
+            notification.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <span>${message}</span>
+                    <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-white hover:text-gray-200">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
             container.appendChild(notification);
             setTimeout(() => notification.classList.add('show'), 100);
             if (duration > 0) {
-                setTimeout(() => { notification.classList.remove('show'); setTimeout(() => notification.remove(), 300); }, duration);
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                    setTimeout(() => notification.remove(), 300);
+                }, duration);
             }
         }
 
+        // Form submission handling
         function setupSignupForm() {
             const signupForm = document.getElementById('signupForm');
             const usernameInput = document.getElementById('username');
             const emailInput = document.getElementById('email');
             const passwordInput = document.getElementById('password');
+            const confirmPasswordInput = document.getElementById('confirmPassword');
+            const passwordStrength = document.getElementById('passwordStrength');
+
+            // Password strength feedback
+            passwordInput.addEventListener('input', () => {
+                const password = passwordInput.value;
+                let strength = 'Weak';
+                let color = 'text-red-400';
+                if (password.length >= 8 && /[A-Z]/.test(password) && /[0-9]/.test(password)) {
+                    strength = 'Strong';
+                    color = 'text-green-400';
+                } else if (password.length >= 6) {
+                    strength = 'Moderate';
+                    color = 'text-yellow-400';
+                }
+                passwordStrength.textContent = `Password Strength: ${strength}`;
+                passwordStrength.className = `text-sm mt-1 ${color}`;
+            });
 
             signupForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const username = usernameInput.value.trim();
                 const email = emailInput.value.trim();
                 const password = passwordInput.value;
+                const confirmPassword = confirmPasswordInput.value;
 
+                // Client-side validation
                 if (username.length < 3) {
-                    showNotification('Username must be at least 3 characters.', 'error');
+                    showNotification('Username must be at least 3 characters long', 'error');
                     return;
                 }
-                if (!email.includes('@') || !email.includes('.')) {
-                    showNotification('Invalid email format.', 'error');
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                    showNotification('Please enter a valid email address', 'error');
                     return;
                 }
                 if (password.length < 6) {
-                    showNotification('Password must be at least 6 characters.', 'error');
+                    showNotification('Password must be at least 6 characters long', 'error');
+                    return;
+                }
+                if (password !== confirmPassword) {
+                    showNotification('Passwords do not match', 'error');
                     return;
                 }
 
@@ -218,21 +307,22 @@
                     const response = await fetch('/api/signup', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ username, email, password })
+                        body: JSON.stringify({ username, password, email })
                     });
                     const data = await response.json();
                     if (response.ok) {
-                        showNotification(data.message || 'Signup successful', 'success', 2000);
-                        setTimeout(() => { window.location.href = data.redirect || 'index.html'; }, 2000);
+                        showNotification(data.message, 'success', 2000);
+                        setTimeout(() => { window.location.href = data.redirect; }, 2000);
                     } else {
-                        showNotification(data.error || 'Signup failed', 'error');
+                        showNotification(data.error, 'error');
                     }
                 } catch (error) {
-                    showNotification('An error occurred. Please try again.', 'error');
+                    showNotification('Signup failed', 'error');
                 }
             });
         }
 
+        // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             initParticles();
             setupSignupForm();
