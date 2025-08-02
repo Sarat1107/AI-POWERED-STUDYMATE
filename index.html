@@ -233,39 +233,42 @@
             const usernameInput = document.getElementById('username');
             const passwordInput = document.getElementById('password');
 
-            loginForm.addEventListener('submit', async (e) => {
+            loginForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 const username = usernameInput.value.trim();
                 const password = passwordInput.value;
 
-                try {
-                    const response = await fetch('/api/login', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ username, password })
-                    });
-                    const data = await response.json();
-                    if (response.ok) {
-                        localStorage.setItem('loggedInUser', username);
-                        localStorage.setItem('token', data.token);
-                        showNotification(data.message, 'success', 2000);
-                        setTimeout(() => { window.location.href = data.redirect; }, 2000);
-                    } else {
-                        showNotification(data.error, 'error');
-                    }
-                } catch (error) {
-                    showNotification('Login failed', 'error');
+                // Simulate authentication (using localStorage for demo)
+                // Note: localStorage is used for demo purposes only. In production, use secure backend authentication.
+                const users = JSON.parse(localStorage.getItem('users') || '{}');
+                if (!users[username]) {
+                    showNotification('Username does not exist', 'error');
+                    return;
                 }
+                if (users[username].password !== password) {
+                    showNotification('Incorrect password', 'error');
+                    return;
+                }
+
+                // Set logged-in user
+                localStorage.setItem('loggedInUser', username);
+
+                showNotification('Login successful! Redirecting to StudyMate...', 'success', 2000);
+                setTimeout(() => {
+                    window.location.href = 'studymate.html';
+                }, 2000);
             });
         }
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             // Check if user is already logged in
-            const token = localStorage.getItem('token');
-            if (token) {
+            const loggedInUser = localStorage.getItem('loggedInUser');
+            if (loggedInUser) {
                 showNotification('Already logged in! Redirecting to StudyMate...', 'success', 2000);
-                setTimeout(() => { window.location.href = 'studymate.html'; }, 2000);
+                setTimeout(() => {
+                    window.location.href = 'studymate.html';
+                }, 2000);
                 return;
             }
 
