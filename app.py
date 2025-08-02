@@ -1,4 +1,3 @@
-```python
 from flask import Flask, request, jsonify, send_from_directory
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
 from werkzeug.utils import secure_filename
@@ -139,4 +138,5 @@ def serve(path):
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
 ```
+
 
