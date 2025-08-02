@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyMate - AI-Powered PDF Q&A System</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+            --secondary-gradient: linear-gradient(45deg, #ff6b9d, #c44569, #f8b500, #ff3838);
+            --accent-gradient: linear-gradient(135deg, #ff6b9d 0%, #c44569 100%);
+            --neon-blue: #00d4ff;
+            --neon-pink: #ff0080;
+            --neon-green: #00ff88;
+        }
+        body {
+            background: black;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            font-family: 'Arial', 'Helvetica', 'Verdana', sans-serif;
+        }
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+        .glass-effect {
+            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            transition: all 0.3s ease;
+        }
+        .glass-effect:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.5);
+        }
+        .gradient-text {
+            background: var(--secondary-gradient);
+            background-size: 400% 400%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientShift 3s ease infinite;
+        }
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        .upload-area {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+        .upload-area::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: rotate(45deg);
+            transition: all 0.6s;
+            opacity: 0;
+        }
+        .upload-area:hover::before {
+            animation: shimmer 1.5s infinite;
+        }
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); opacity: 0; }
+        }
+        .upload-area.dragover {
+            background: linear-gradient(135deg, rgba(255, 107, 157, 0.3), rgba(196, 69, 105, 0.3));
+            border-color: var(--neon-pink);
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(255, 107, 157, 0.5);
+        }
+        .btn-primary {
+            background: linear-gradient(45deg, #ff6b9d, #c44569);
+            border: none;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        .neon-border {
+            border: 2px solid var(--neon-pink);
+            box-shadow: 0 0 10px var(--neon-pink), inset 0 0 10px rgba(255, 0, 128, 0.1);
+            animation: neonPulse 2s infinite alternate;
+        }
+        @keyframes neonPulse {
+            from { box-shadow: 0 0 10px var(--neon-pink), inset 0 0 10px rgba(255, 0, 128, 0.1); }
+            to { box-shadow: 0 0 20px var(--neon-pink), 0 0 30px var(--neon-pink), inset 0 0 20px rgba(255, 0, 128, 0.2); }
+        }
+        .qa-item {
+            animation: slideInUp 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        .progress-bar {
+            width: 0%;
+            height: 4px;
+            background: linear-gradient(45deg, var(--neon-pink), var(--neon-green));
+            transition: width 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            animation: progressShine 2s infinite;
+        }
+        @keyframes progressShine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        .feature-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .feature-card:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        }
+        .typing-animation::after {
+            content: '|';
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        .model-badge {
+            background: linear-gradient(45deg, #ff6b9d, #c44569, #f8b500);
+            background-size: 200% 200%;
+            animation: gradientMove 3s ease infinite;
+            position: relative;
+            overflow: hidden;
+        }
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .stat-counter {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--neon-pink);
+            text-shadow: 0 0 10px var(--neon-pink);
+        }
+        @media (max-width: 768px) {
+            .glass-effect {
+                margin: 0.5rem;
+                padding: 1rem;
+            }
+            .feature-card {
+                margin-bottom: 1rem;
+            }
+        }
+        .loading-spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-left: 4px solid var(--neon-pink);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .content-area {
+            position: relative;
+            z-index: 1;
+        }
+        .logout-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        .hidden {
+            display: none !important;
+        }
+        .rotate-180 {
+            transform: rotate(180deg);
+        }
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1001;
+            min-width: 300px;
+            max-width: 400px;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            color: white;
+            font-weight: 500;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+        .notification.show {
+            transform: translateX(0);
+        }
+        .notification.success {
+            background: linear-gradient(45deg, #10b981, #059669);
+        }
+        .notification.error {
+            background: linear-gradient(45deg, #ef4444, #dc2626);
+        }
+        .notification.info {
+            background: linear-gradient(45deg, #3b82f6, #2563eb);
+        }
+    </style>
+</head>
+<body class="font-sans">
+    <div class="particles" id="particles"></div>
+    <div class="content-area min-h-screen p-4">
+        <header class="text-center mb-8">
+            <div class="glass-effect rounded-3xl p-8 max-w-5xl mx-auto">
+                <h1 class="text-5xl font-bold gradient-text mb-4">
+                    <i class="fas fa-book-reader mr-3"></i>StudyMate
+                </h1>
+                <p class="text-white opacity-90 text-xl mb-6">AI-Powered PDF Q&A System for Students</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="feature-card rounded-xl p-4">
+                        <div class="stat-counter" id="questionsCount">0</div>
+                        <div class="text-white opacity-80">Questions Asked</div>
+                    </div>
+                    <div class="feature-card rounded-xl p-4">
+                        <div class="stat-counter" id="documentsCount">0</div>
+                        <div class="text-white opacity-80">Documents Processed</div>
+                    </div>
+                    <div class="feature-card rounded-xl p-4">
+                        <div class="stat-counter" id="accuracyRate">98.5%</div>
+                        <div class="text-white opacity-80">Accuracy Rate</div>
+                    </div>
+                </div>
+                <div class="flex flex-wrap justify-center items-center gap-3">
+                    <span class="model-badge text-white px-4 py-2 rounded-full text-sm font-medium">
+                        <i class="fas fa-brain mr-2"></i>IBM Granite-3.0-8B-Instruct
+                    </span>
+                    <span class="bg-gradient-to-r from-green-400 to-blue-500 text-white px-4 py-2 rounded-full text-sm font-medium">
+                        <i class="fas fa-search mr-2"></i>FAISS Semantic Search
+                    </span>
+                    <span class="bg-gradient-to-r from-purple-400 to-pink-500 text-white px-4 py-2 rounded-full text-sm font-medium">
+                        <i class="fas fa-file-pdf mr-2"></i>PyMuPDF Processing
+                    </span>
+                </div>
+            </div>
+        </header>
+        <div class="max-w-6xl mx-auto space-y-8">
+            <div id="statusBanner" class="hidden">
+                <div class="glass-effect rounded-2xl p-4 text-center">
+                    <div id="statusContent" class="text-white font-medium"></div>
+                    <div class="progress-bar mt-2 rounded-full" id="progressBar"></div>
+                </div>
+            </div>
+            <div class="glass-effect rounded-3xl p-8">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-3xl font-bold text-white">
+                        <i class="fas fa-upload mr-3 text-pink-400"></i>1. Upload Your Study Materials
+                    </h2>
+                    <div class="flex space-x-2">
+                        <button id="quickUploadBtn" class="btn-primary text-white px-4 py-2 rounded-lg" aria-label="Quick Upload">
+                            <i class="fas fa-bolt mr-2"></i>Quick Upload
+                        </button>
+                        <button id="bulkUploadBtn" class="btn-primary text-white px-4 py-2 rounded-lg" aria-label="Bulk Upload">
+                            <i class="fas fa-layer-group mr-2"></i>Bulk Upload
+                        </button>
+                    </div>
+                </div>
+                <div id="uploadArea" class="upload-area border-2 border-dashed border-white border-opacity-50 rounded-2xl p-12 text-center transition-all duration-300 hover:border-opacity-80">
+                    <div class="text-white">
+                        <div class="mb-6">
+                            <i class="fas fa-cloud-upload-alt text-6xl mb-4 text-blue-300"></i>
+                        </div>
+                        <p class="text-2xl mb-3 font-semibold">Drag & Drop PDF files here</p>
+                        <p class="text-lg opacity-75 mb-6">or click to browse (supports multiple files)</p>
+                        <div class="space-y-3">
+                            <button id="browseBtn" class="btn-primary bg-blue-500 hover:bg-blue-600 text-white px-8 py-3 rounded-xl transition-all duration-300 transform hover:scale-105" aria-label="Browse Files">
+                                <i class="fas fa-folder-open mr-2"></i>Browse Files
+                            </button>
+                            <div class="text-sm opacity-60">
+                                <i class="fas fa-info-circle mr-1"></i>
+                                Supported formats: PDF • Max size: 10MB per file
+                            </div>
+                        </div>
+                    </div>
+                    <input type="file" id="fileInput" multiple accept=".pdf" class="hidden">
+                </div>
+                <div id="filesList" class="mt-6 hidden">
+                    <h3 class="text-white font-semibold mb-4 text-xl">
+                        <i class="fas fa-list mr-2"></i>Uploaded Documents:
+                    </h3>
+                    <div id="filesContainer" class="grid gap-3"></div>
+                </div>
+            </div>
+            <div class="glass-effect rounded-3xl p-8">
+                <h2 class="text-3xl font-bold text-white mb-6">
+                    <i class="fas fa-question-circle mr-3 text-green-400"></i>2. Ask Your Question
+                </h2>
+                <div class="mb-6">
+                    <p class="text-white opacity-80 mb-3">Quick question templates:</p>
+                    <div class="flex flex-wrap gap-2">
+                        <button class="question-template bg-white bg-opacity-20 text-white px-3 py-1 rounded-full text-sm hover:bg-opacity-30 transition-all">
+                            "Summarize the main points about..."
+                        </button>
+                        <button class="question-template bg-white bg-opacity-20 text-white px-3 py-1 rounded-full text-sm hover:bg-opacity-30 transition-all">
+                            "What is the definition of..."
+                        </button>
+                        <button class="question-template bg-white bg-opacity-20 text-white px-3 py-1 rounded-full text-sm hover:bg-opacity-30 transition-all">
+                            "Explain the relationship between..."
+                        </button>
+                        <button class="question-template bg-white bg-opacity-20 text-white px-3 py-1 rounded-full text-sm hover:bg-opacity-30 transition-all">
+                            "What are the key differences between..."
+                        </button>
+                    </div>
+                </div>
+                <div class="flex flex-col lg:flex-row space-y-4 lg:space-y-0 lg:space-x-4">
+                    <div class="flex-1">
+                        <textarea
+                            id="questionInput"
+                            placeholder="Ask any question about your uploaded documents..."
+                            class="w-full p-4 rounded-xl bg-white bg-opacity-90 border-none focus:ring-4 focus:ring-blue-300 focus:outline-none resize-none transition-all duration-300"
+                            rows="4"
+                            aria-label="Question Input"
+                        ></textarea>
+                        <div class="flex justify-between items-center mt-2 text-white opacity-70 text-sm">
+                            <span id="charCount">0 characters</span>
+                            <span>Press Ctrl+Enter to submit</span>
+                        </div>
+                    </div>
+                    <div class="flex flex-col space-y-3">
+                        <button
+                            id="askBtn"
+                            class="btn-primary bg-green-500 hover:bg-green-600 text-white px-8 py-4 rounded-xl transition-all duration-300 font-semibold disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105"
+                            disabled
+                            aria-label="Ask StudyMate"
+                        >
+                            <i class="fas fa-paper-plane mr-2"></i>Ask StudyMate
+                        </button>
+                        <button
+                            id="voiceBtn"
+                            class="btn-primary bg-purple-500 hover:bg-purple-600 text-white px-8 py-4 rounded-xl transition-all duration-300 font-semibold"
+                            aria-label="Voice Input"
+                        >
+                            <i class="fas fa-microphone mr-2"></i>Voice Input
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div id="answerSection" class="glass-effect rounded-3xl p-8 hidden">
+                <h2 class="text-3xl font-bold text-white mb-6">
+                    <i class="fas fa-robot mr-3 text-yellow-400"></i>3. AI Response
+                </h2>
+                <div id="answerCard" class="bg-white bg-opacity-95 rounded-2xl p-8 shadow-2xl">
+                    <div id="answerContent" class="text-gray-800 leading-relaxed text-lg"></div>
+                    <div class="flex flex-wrap gap-4 mt-6">
+                        <button class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-all" aria-label="Copy Answer">
+                            <i class="fas fa-copy mr-2"></i>Copy Answer
+                        </button>
+                        <button class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-all" aria-label="Share Answer">
+                            <i class="fas fa-share-alt mr-2"></i>Share
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button id="logoutBtn" class="logout-btn btn-primary text-white px-4 py-2 rounded-lg" aria-label="Log Out">
+            <i class="fas fa-sign-out-alt mr-2"></i>Log Out
+        </button>
+    </div>
+    <div id="notificationContainer"></div>
+
+    <script>
+        // Initialize particles
+        function initParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = window.innerWidth < 768 ? 20 : 50;
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                const size = Math.random() * 5 + 2;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.top = `${Math.random() * 100}%`;
+                particle.style.animationDelay = `${Math.random() * 5}s`;
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Notification function
+        function showNotification(message, type = 'info', duration = 3000) {
+            const container = document.getElementById('notificationContainer');
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <span>${message}</span>
+                    <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-white hover:text-gray-200">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            container.appendChild(notification);
+            setTimeout(() => notification.classList.add('show'), 100);
+            if (duration > 0) {
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                    setTimeout(() => notification.remove(), 300);
+                }, duration);
+            }
+        }
+
+        // File upload handling
+        function setupFileUpload() {
+            const fileInput = document.getElementById('fileInput');
+            const uploadArea = document.getElementById('uploadArea');
+            const filesContainer = document.getElementById('filesContainer');
+            const askBtn = document.getElementById('askBtn');
+
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+            uploadArea.addEventListener('drop', async (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                await handleFiles(files);
+            });
+            fileInput.addEventListener('change', async (e) => {
+                await handleFiles(e.target.files);
+            });
+            document.getElementById('browseBtn').addEventListener('click', () => {
+                fileInput.click();
+            });
+
+            async function handleFiles(files) {
+                for (const file of files) {
+                    if (file.type === 'application/pdf' && file.size <= 10 * 1024 * 1024) {
+                        const formData = new FormData();
+                        formData.append('file', file);
+                        try {
+                            const response = await fetch('/api/upload', {
+                                method: 'POST',
+                                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+                                body: formData
+                            });
+                            const data = await response.json();
+                            if (response.ok) {
+                                const fileItem = document.createElement('div');
+                                fileItem.textContent = data.filename;
+                                fileItem.dataset.filename = data.filename;
+                                filesContainer.appendChild(fileItem);
+                                document.getElementById('filesList').classList.remove('hidden');
+                                askBtn.disabled = false;
+                                showNotification(data.message, 'success');
+                            } else {
+                                showNotification(data.error, 'error');
+                            }
+                        } catch (error) {
+                            showNotification('Upload failed', 'error');
+                        }
+                    } else {
+                        showNotification('Only PDFs up to 10MB are supported', 'error');
+                    }
+                }
+            }
+        }
+
+        // Question asking
+        function setupQuestionAsking() {
+            const askBtn = document.getElementById('askBtn');
+            const questionInput = document.getElementById('questionInput');
+
+            askBtn.addEventListener('click', async () => {
+                const question = questionInput.value.trim();
+                const filename = document.querySelector('#filesContainer div')?.dataset.filename;
+
+                if (!question) {
+                    showNotification('Please enter a question', 'error');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/ask', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        },
+                        body: JSON.stringify({ question, filename })
+                    });
+                    const data = await response.json();
+                    if (response.ok) {
+                        document.getElementById('answerContent').innerHTML = data.answer;
+                        document.getElementById('answerSection').classList.remove('hidden');
+                        showNotification('Question answered successfully', 'success');
+                    } else {
+                        showNotification(data.error, 'error');
+                    }
+                } catch (error) {
+                    showNotification('Failed to process question', 'error');
+                }
+            });
+
+            questionInput.addEventListener('input', (e) => {
+                document.getElementById('charCount').textContent = `${e.target.value.length} characters`;
+            });
+
+            questionInput.addEventListener('keydown', (e) => {
+                if (e.ctrlKey && e.key === 'Enter') {
+                    askBtn.click();
+                }
+            });
+        }
+
+        // Logout handling
+        function setupLogout() {
+            const logoutBtn = document.getElementById('logoutBtn');
+            logoutBtn.addEventListener('click', async () => {
+                try {
+                    const response = await fetch('/api/logout', {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                    });
+                    const data = await response.json();
+                    if (response.ok) {
+                        localStorage.removeItem('loggedInUser');
+                        localStorage.removeItem('token');
+                        showNotification(data.message, 'success', 2000);
+                        setTimeout(() => { window.location.href = data.redirect; }, 2000);
+                    } else {
+                        showNotification(data.error, 'error');
+                    }
+                } catch (error) {
+                    showNotification('Logout failed', 'error');
+                }
+            });
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check if user is logged in
+            const token = localStorage.getItem('token');
+            if (!token) {
+                showNotification('Please log in to access StudyMate', 'error', 2000);
+                setTimeout(() => { window.location.href = 'index.html'; }, 2000);
+                return;
+            }
+
+            initParticles();
+            setupFileUpload();
+            setupQuestionAsking();
+            setupLogout();
+
+            // Placeholder for voice input
+            document.getElementById('voiceBtn').addEventListener('click', () => {
+                showNotification('Voice input not implemented in this demo', 'info');
+            });
+        });
+    </script>
+</body>
+</html>
